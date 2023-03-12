@@ -70,6 +70,16 @@ public class ProjectPlugin implements Plugin<Project> {
             fis.close();
         } catch (IOException e) {}
 
+        Map<String, String> expand = new HashMap<>();
+
+        for (Entry<Object, Object> entry : properties.entrySet()) {
+            expand.put(entry.getKey().toString().toUpperCase(), entry.getValue().toString());
+        }
+        
+        root.allprojects(project -> {
+            project.getExtensions().add("mod", new ModExtension(properties));
+        });
+
         String pkg = properties.getProperty("mod_package", "");
         String ep = properties.getProperty("mod_entrypoint", "");
 
@@ -99,15 +109,7 @@ public class ProjectPlugin implements Plugin<Project> {
             task.getArchiveVersion().set(properties.getProperty("mod_version"));
         });
 
-        Map<String, String> expand = new HashMap<>();
-
-        for (Entry<Object, Object> entry : properties.entrySet()) {
-            expand.put(entry.getKey().toString().toUpperCase(), entry.getValue().toString());
-        }
-
         root.allprojects(project -> {
-            project.getExtensions().add("mod", new ModExtension(properties));
-
             Object ext = project.getExtensions().getByName("java");
 
             if (ext instanceof JavaPluginExtension) {
@@ -248,13 +250,6 @@ public class ProjectPlugin implements Plugin<Project> {
 
         if (ext instanceof JavaPluginExtension) {
             JavaPluginExtension java = (JavaPluginExtension) ext;
-            SourceSet modbase = java.getSourceSets().create("modbase");
-
-            root.getTasks().named("jar", task -> {
-                task.dependsOn(modbase.getClassesTaskName());
-                ((Jar) task).from(modbase.getOutput());
-            });
-
             SourceSet main = java.getSourceSets().getByName("main");
 
             build.dependsOn(root.getTasks().register("devMainJar", Jar.class, task -> {
