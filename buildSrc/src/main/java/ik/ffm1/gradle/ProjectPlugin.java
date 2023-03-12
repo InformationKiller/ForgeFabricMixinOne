@@ -52,7 +52,7 @@ public class ProjectPlugin implements Plugin<Project> {
                 byte[] bytes = new byte[4096];
                 int read;
 
-                while ((read = input.read(bytes)) != 0) {
+                while ((read = input.read(bytes)) > 0) {
                     fos.write(bytes, 0, read);
                 }
 
