@@ -41,6 +41,15 @@ public class ProjectPlugin implements Plugin<Project> {
         logger.lifecycle("Welcome to Forge & Fabric Mixin One!");
 
         root.getDependencies().add("implementation", root.project(":game:api"));
+        root.project(":game:fabric-mixin", project -> {
+            Object ext = project.getExtensions().getByName("java");
+
+            if (ext instanceof JavaPluginExtension) {
+                JavaPluginExtension java = (JavaPluginExtension) ext;
+
+                java.getSourceSets().create("mixin");
+            }
+        });
 
         File prop = root.file("mod.properties");
 
@@ -160,14 +169,6 @@ public class ProjectPlugin implements Plugin<Project> {
         });
 
         Project mixin = root.project(":game:fabric-mixin", project -> {
-            Object ext = project.getExtensions().getByName("java");
-
-            if (ext instanceof JavaPluginExtension) {
-                JavaPluginExtension java = (JavaPluginExtension) ext;
-
-                java.getSourceSets().create("mixin");
-            }
-
             MergeMixin merge = project.getTasks().create("mergeMixin", MergeMixin.class);
 
             build.mustRunAfter(merge);
