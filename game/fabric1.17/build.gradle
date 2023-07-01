@@ -1,5 +1,5 @@
 java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 tasks.withType(JavaCompile).configureEach {
-    sourceCompatibility = targetCompatibility = 8 // Don't touch
+    sourceCompatibility = targetCompatibility = 16 // Don't touch
 }

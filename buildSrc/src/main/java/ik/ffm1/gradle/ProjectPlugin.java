@@ -15,7 +15,6 @@ import org.gradle.api.Project;
 import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.JavaPluginExtension;
-import org.gradle.api.specs.Spec;
 import org.gradle.api.specs.Specs;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
@@ -23,7 +22,6 @@ import org.gradle.api.tasks.SourceTask;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import ik.ffm1.gradle.extensions.ModExtension;
@@ -42,15 +40,6 @@ public class ProjectPlugin implements Plugin<Project> {
         logger.lifecycle("Welcome to Forge & Fabric Mixin One!");
 
         root.getDependencies().add("implementation", root.project(":game:api"));
-        root.project(":game:fabric-mixin", project -> {
-            Object ext = project.getExtensions().getByName("java");
-
-            if (ext instanceof JavaPluginExtension) {
-                JavaPluginExtension java = (JavaPluginExtension) ext;
-
-                java.getSourceSets().create("mixin");
-            }
-        });
 
         File prop = root.file("mod.properties");
 
@@ -133,9 +122,6 @@ public class ProjectPlugin implements Plugin<Project> {
                         task.expand(expand, detail -> {
                             detail.getEscapeBackslash().set(true);
                         });
-//                        task.doLast(t -> {
-//                            sourceSet.getJava().setSrcDirs(ImmutableList.of(output));
-//                        });
 
                         task.getOutputs().upToDateWhen(Specs.SATISFIES_NONE);
                     });
@@ -184,38 +170,18 @@ public class ProjectPlugin implements Plugin<Project> {
             });
         });
 
-        mixin.subprojects(project -> {
-            Object ext = project.getExtensions().getByName("java");
-            Object parentExt = mixin.getExtensions().getByName("java");
-
-            if (parentExt instanceof JavaPluginExtension && ext instanceof JavaPluginExtension) {
-                JavaPluginExtension java = (JavaPluginExtension) ext;
-                JavaPluginExtension parentJava = (JavaPluginExtension) parentExt;
-
-                java.getSourceSets().getByName("main").getJava().setSrcDirs(parentJava.getSourceSets().getByName("mixin").getJava().getSrcDirs());
-            }
-
-            mixin.getTasks().named("assemble", task -> {
-                task.dependsOn(project.getTasks().named("assemble"));
-            });
-
-            project.getTasks().named("jar", task -> {
-                ((MergeMixin) mixin.getTasks().getByName("mergeMixin")).mixin(project.getName().substring(7), ((Jar) task).getArchiveFile().get().getAsFile());
-            });
-
-            project.apply(ImmutableMap.of("from", mixin.file("mixin.gradle")));
-        });
-
         Project game = root.project(":game");
 
         game.subprojects(project -> {
-            String type = null;
+            String t = null;
 
             if (project.getName().startsWith("forge")) {
-                type = "forge";
+                t = "forge";
             } else if (project.getName().startsWith("fabric")) {
-                type = "fabric";
+                t = "fabric";
             }
+
+            final String type = t;
 
             if (type != null) {
                 build.dependsOn(project.getTasks().named("assemble"));
@@ -233,11 +199,21 @@ public class ProjectPlugin implements Plugin<Project> {
                         File output = ((Jar) jar).getArchiveFile().get().getAsFile();
 
                         validate.impl(output);
+
+                        if (type.equals("fabric")) {
+                            ((MergeMixin) mixin.getTasks().getByName("mergeMixin")).mixin(project.getName().substring(6), ((Jar) jar).getArchiveFile().get().getAsFile());
+                        }
                     });
 
                     project.getTasks().named("assemble", assemble -> {
                         assemble.finalizedBy(validate);
                     });
+
+                    if (type.equals("fabric")) {
+                        mixin.getTasks().named("assemble", task -> {
+                            task.dependsOn(project.getTasks().named("assemble"));
+                        });
+                    }
                 }
 
                 build.core(project);
