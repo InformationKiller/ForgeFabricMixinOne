@@ -24,8 +24,6 @@ import net.minecraftforge.fml.loading.moddiscovery.ExplodedDirectoryLocator;
 
 public class ModLocator extends ExplodedDirectoryLocator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("${MOD_ID}");
-
     @Override
     public String name() {
         return "${MOD_ID} modloader";
@@ -67,13 +65,11 @@ public class ModLocator extends ExplodedDirectoryLocator {
         Path core = fs.getPath("/META-INF/core/forge" + ver[0] + "." + ver[1] + ".jar");
 
         if (!Files.exists(mod)) {
-            LOGGER.error("Missing mod.jar.");
-            throw new Error("Missing mod.jar.");
+            throw new Error("[${MOD_ID}] Missing mod.jar.");
         }
 
         if (!Files.exists(core)) {
-            LOGGER.error("This mod do not support Minecraft " + arguments.get("mcVersion"));
-            throw new Error("This mod do not support Minecraft " + arguments.get("mcVersion"));
+            throw new Error("${MOD_ID}] This mod do not support Minecraft " + arguments.get("mcVersion"));
         }
 
         try {

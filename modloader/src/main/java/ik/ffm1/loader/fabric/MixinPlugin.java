@@ -30,7 +30,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         String[] ver = FabricLoaderImpl.INSTANCE.getGameProvider().getRawGameVersion().split("\\.");
 
         if (ver.length < 2) {
-            FabricGuiEntry.displayError("Incompatible mod.", new RuntimeException("This mod do not support Minecraft " + ver[0]), false);
+            FabricGuiEntry.displayError("Incompatible mod.", new RuntimeException("${MOD_ID}] This mod do not support Minecraft " + ver[0]), true);
             throw new RuntimeException("This mod do not support Minecraft " + ver[0]);
         }
 
@@ -45,7 +45,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         Path core = fs.getPath(coreFile);
 
         if (!Files.exists(core)) {
-            FabricGuiEntry.displayError("Incompatible mod.", new RuntimeException("This mod do not support Minecraft " + FabricLoaderImpl.INSTANCE.getGameProvider().getRawGameVersion()), false);
+            FabricGuiEntry.displayError("Incompatible mod.", new RuntimeException("${MOD_ID}] This mod do not support Minecraft " + FabricLoaderImpl.INSTANCE.getGameProvider().getRawGameVersion()), true);
             throw new RuntimeException("This mod do not support Minecraft " + FabricLoaderImpl.INSTANCE.getGameProvider().getRawGameVersion());
         }
 
