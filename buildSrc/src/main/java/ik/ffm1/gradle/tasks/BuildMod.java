@@ -170,7 +170,7 @@ public class BuildMod extends DefaultTask {
             });
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            Map json = gson.fromJson(new String(jsonBuf.toByteArray(), "UTF-8"), Map.class);
+            Map<String, List<String>> json = gson.fromJson(new String(jsonBuf.toByteArray(), "UTF-8"), Map.class);
 
             json.put("mixins", mixins);
 
